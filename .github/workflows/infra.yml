@@ -1,0 +1,78 @@
+name: Provision AWS Infrastructure
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ec2-terraform
+    paths:
+      - "terraform/infrastructure/**"
+      - ".github/workflows/infra.yml"
+
+env:
+  TF_IN_AUTOMATION: true
+  # These variables configure the nodejs-app OIDC deployment role.
+  # They refer to the APPLICATION repo, not this infrastructure repo.
+  TF_VAR_github_org: ${{ github.repository_owner }}
+  TF_VAR_github_repo: "nodejs-app"
+  TF_VAR_github_branch: "ec2-terraform"
+
+jobs:
+  terraform:
+    name: Provision AWS Infrastructure
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-south-1
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+
+      - name: Verify AWS Authentication
+        run: aws sts get-caller-identity
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.1
+
+      - name: Terraform Format Check
+        working-directory: ./terraform/infrastructure
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: ./terraform/infrastructure
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ./terraform/infrastructure
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: ./terraform/infrastructure
+        run: terraform plan -no-color
+
+      - name: Terraform Apply
+        working-directory: ./terraform/infrastructure
+        run: terraform apply -auto-approve -no-color
+
+      - name: Deployment Summary
+        run: |
+          echo "=========================================="
+          echo "✅ AWS Infrastructure provisioned successfully!"
+          echo ""
+          echo "Resources created:"
+          echo "  • ECR Repository"
+          echo "  • Security Group"
+          echo "  • EC2 Instance"
+          echo "  • IAM Roles & SSM Instance Profile"
+          echo "  • nodejs-app OIDC Deployment Role"
+          echo "=========================================="

@@ -1,0 +1,5 @@
+aws_region                  = "ap-south-1"
+project_name                = "nodejs-app"
+github_org                  = "integrationninjas"
+github_infra_repo           = "aws-terraform-lab"
+github_oidc_subject_prefix  = "repo:integrationninjas@140945507/aws-terraform-lab@1311111993"

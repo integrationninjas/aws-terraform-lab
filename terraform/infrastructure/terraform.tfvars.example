@@ -1,0 +1,15 @@
+aws_region    = "ap-south-1"
+project_name  = "nodejs-app"
+instance_type = "t3.micro"
+app_port      = 5000
+
+# ─── OIDC Trust Policy Scoping ───────────────────────────────────
+# These variables control WHICH GitHub repo + branch can assume the
+# nodejs-app deployment role. Set these to the APPLICATION repo.
+#
+# After terraform apply, copy the output `github_actions_role_arn`
+# into the application repo's GitHub Secret: AWS_IAM_ROLE
+# ─────────────────────────────────────────────────────────────────
+github_org    = "integrationninjas"
+github_repo   = "nodejs-app"
+github_branch = "ec2-terraform"
