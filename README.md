@@ -12,41 +12,37 @@ When attempting to use GitHub Actions OIDC to run Terraform, you need an OIDC pr
 ## Architecture
 
 ```mermaid
-architecture-beta
-    group github(logo:github)[GitHub]
-    group aws(logo:aws)[AWS Cloud]
+graph TD
+    subgraph GitHub
+        infra_repo["aws-terraform-lab (Repo)"]
+        app_repo["nodejs-app (Repo)"]
+    end
     
-    %% GitHub Repositories
-    service infra_repo(logo:github)[aws-terraform-lab] in github
-    service app_repo(logo:github)[nodejs-app] in github
-    
-    %% AWS Services
-    service oidc(logo:aws-iam)[IAM OIDC Provider] in aws
-    service role_tf(logo:aws-iam)[Terraform Runner Role] in aws
-    service role_deploy(logo:aws-iam)[App Deployment Role] in aws
-    
-    service ecr(logo:aws-ecr)[Elastic Container Registry] in aws
-    service ec2(logo:aws-ec2)[EC2 Instance\n(Port 5000 open)] in aws
-    service ssm(logo:aws-systems-manager)[Systems Manager (SSM)] in aws
+    subgraph AWS Cloud
+        oidc["IAM OIDC Provider"]
+        role_tf["Terraform Runner Role"]
+        role_deploy["App Deployment Role"]
+        
+        ecr["Elastic Container Registry"]
+        ec2["EC2 Instance (Port 5000 open)"]
+        ssm["Systems Manager (SSM)"]
+    end
     
     %% Step 1: Bootstrap (Local)
-    service local(logo:aws-cli)[Local Developer]
-    local:R --> L:oidc
-    local:R --> L:role_tf
+    local_dev["Local Developer"] -. "1. Creates" .-> oidc
+    local_dev -. "1. Creates" .-> role_tf
     
     %% Stage 1: Infrastructure Provisioning
-    infra_repo:R --> L:oidc
-    oidc:B --> T:role_tf
-    role_tf:R --> L:ecr
-    role_tf:R --> L:ec2
-    role_tf:R --> L:role_deploy
+    infra_repo -- "2. Authenticates via OIDC" --> role_tf
+    role_tf -- "3. Provisions" --> ecr
+    role_tf -- "3. Provisions" --> ec2
+    role_tf -- "3. Creates" --> role_deploy
     
     %% Stage 2: Application Deployment
-    app_repo:B --> T:oidc
-    oidc:R --> L:role_deploy
-    role_deploy:B --> T:ecr
-    role_deploy:B --> T:ssm
-    ssm:L --> R:ec2
+    app_repo -- "4. Authenticates via OIDC" --> role_deploy
+    role_deploy -- "5. Pushes Image" --> ecr
+    role_deploy -- "6. Sends Deploy Command" --> ssm
+    ssm -- "7. Executes Script" --> ec2
 ```
 
 ## How It Works
