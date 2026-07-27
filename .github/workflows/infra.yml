@@ -70,4 +70,4 @@ jobs:
       # Step 9: Executes the planned changes to create or update AWS resources automatically
       - name: Terraform Apply
         working-directory: ./terraform/infrastructure
-        run: terraform apply -auto-approve -no-color
+        run: terraform apply -auto-approve -no-color 
