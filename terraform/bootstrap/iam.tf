@@ -14,7 +14,7 @@ resource "aws_iam_role" "terraform_runner" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = var.github_oidc_subject_prefix != "" ? "${var.github_oidc_subject_prefix}:*" : "repo:${var.github_org}/${var.github_infra_repo}:*"
+            "token.actions.githubusercontent.com:sub" = "${var.github_oidc_subject}:*"
           }
         }
       }

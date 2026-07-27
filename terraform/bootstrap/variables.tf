@@ -10,20 +10,8 @@ variable "project_name" {
   default     = "aws-terraform-lab"
 }
 
-variable "github_org" {
-  description = "GitHub organization or username (e.g. integrationninjas)"
+variable "github_oidc_subject" {
+  description = "The OIDC subject claim that identifies which GitHub repo can assume this role"
   type        = string
-  default     = "integrationninjas"
-}
-
-variable "github_infra_repo" {
-  description = "The infrastructure repo that runs Terraform via GitHub Actions"
-  type        = string
-  default     = "aws-terraform-lab"
-}
-
-variable "github_oidc_subject_prefix" {
-  description = "Optional custom OIDC subject claim prefix (defaults to repo:<github_org>/<github_infra_repo>)"
-  type        = string
-  default     = ""
+  default     = "repo:integrationninjas@140945507/aws-terraform-lab@1311111993"
 }
