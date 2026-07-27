@@ -1,0 +1,11 @@
+# Local Terraform files
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfvars
+
+# OS / Editor files
+.DS_Store
+*.swp
+.idea/
+.vscode/
